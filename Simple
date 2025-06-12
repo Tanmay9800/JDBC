@@ -1,0 +1,64 @@
+package jdbc;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class SimpleSelectQueryExampleMain {
+
+	public static void main(String[] args) {
+		/*
+		 	1. Load the Driver
+			2. Establish Connection with DB
+			3. Obtain some Statement
+			4. Execute SQL Query
+			5. In case of SELECT query, obtain a ResultSet and perform navigation
+		 */
+		String driverClassName = "com.mysql.cj.jdbc.Driver";
+		String URL = "jdbc:mysql://localhost:3306/bookmyshow?useSSL=false";
+		String userName = "root";
+		String password = "root";
+		Connection dbConnection = null;
+		Statement stmt = null;
+		String sqlQuery = 
+				"select movie_title, movie_year, movie_genre from movie_master";
+		ResultSet recordSet = null;
+		try {
+			// 1. Load the JDBC Driver
+			Class.forName(driverClassName);
+
+			// 2. Establish Connection with Database
+			dbConnection = DriverManager.getConnection(URL, userName, password);
+
+			// 3. Create Statement object
+			stmt = dbConnection.createStatement();
+
+			// 4. Execute SELECT SQL Query
+			recordSet = stmt.executeQuery(sqlQuery);
+
+			// 5. Process ResultSet: Read each record
+			while(recordSet.next()) {
+				String title = recordSet.getString(1); // first column
+				int year = recordSet.getInt(2);        // second column
+				String genre = recordSet.getString(3); // third column
+
+				System.out.println(title + " - " + year + " - " + genre);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			// 6. Always close all resources
+			try {
+				recordSet.close();
+				stmt.close();
+				dbConnection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+}
