@@ -1,0 +1,146 @@
+package jdbc.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import jdbc.entity.Movie;
+import jdbc.utils.JdbcUtils;
+
+public class MovieDao implements IDao<Movie, Integer>{
+
+	@Override
+	public Collection<Movie> readAll() {
+		Collection<Movie> allMovies = new ArrayList<>();
+		//Connect to DB, fire SELECT query to get all records
+		//Convert all records into Movie objects, store Movie objects into Collection
+		//Return the collection.
+		try(
+				Connection conn = JdbcUtils.obtainConnection();
+				Statement stmt = conn.createStatement();
+				ResultSet recordSet = stmt.executeQuery("select * from movie_master")
+				){
+			while(recordSet.next()) {
+				String title = recordSet.getString(2);
+				int year = recordSet.getInt(4);
+				String genre = recordSet.getString(3);
+				int id = recordSet.getInt(1);
+				Movie currentMovie = 
+						new Movie(id, title, genre, year);
+				allMovies.add(currentMovie);
+			}
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+		return allMovies;
+	}
+
+	@Override
+	public Movie readOne(Integer movieId) {
+		Movie foundMovie = null;
+		String sqlQuery = "select * from movie_master where movie_id = ?";
+		try(
+				Connection conn = JdbcUtils.obtainConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sqlQuery)
+			){
+				pstmt.setInt(1, movieId);
+				ResultSet recordSet = pstmt.executeQuery();
+				
+				if(recordSet.next()) {
+					String title = recordSet.getString(2);
+					int year = recordSet.getInt(4);
+					String genre = recordSet.getString(3);
+					int id = recordSet.getInt(1);
+					foundMovie = new Movie(id, title, genre, year);
+				}
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+				
+		return foundMovie;
+	}
+
+	@Override
+	public void create(Movie newMovie) {
+		String sqlQuery = "insert into movie_master values(?,?,?,?)";
+		try(
+				Connection conn = JdbcUtils.obtainConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sqlQuery)
+			){
+			int movieId = newMovie.getMovieId();
+			String title = newMovie.getTitle();
+			String genre = newMovie.getGenre();
+			int year = newMovie.getYear();
+			
+			pstmt.setInt(1, movieId);
+			pstmt.setString(2, title);
+			pstmt.setString(3, genre);
+			pstmt.setInt(4, year);
+			
+			int count = pstmt.executeUpdate();
+			System.out.println(count + " record inserted.");
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	@Override
+	public void update(Movie modifiedMovie) {
+		String sqlQuery = 
+"update movie_master set movie_title = ?, movie_genre = ?, movie_year = ? where movie_id = ?";
+		try(
+				Connection conn = JdbcUtils.obtainConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sqlQuery)
+			){
+				int movieId = modifiedMovie.getMovieId();
+				String title = modifiedMovie.getTitle();
+				String genre = modifiedMovie.getGenre();
+				int year = modifiedMovie.getYear();
+				
+				pstmt.setInt(4, movieId);
+				pstmt.setString(1, title);
+				pstmt.setString(2, genre);
+				pstmt.setInt(3, year);
+				
+				int count = pstmt.executeUpdate();
+				System.out.println(count + " record updated.");
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	@Override
+	public void delete(Integer movieId) {
+		String sqlQuery = "delete from movie_master where movie_id = ?";
+		try(
+				Connection conn = JdbcUtils.obtainConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sqlQuery)
+			){
+			pstmt.setInt(1, movieId);
+			int count = pstmt.executeUpdate();
+			if(count != 0)
+				System.out.println(count + " record deleted");
+			else
+				System.out.println("Unable to delete as Movie ID not found.");
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+}
+
+
+
+
+
+
+
+
