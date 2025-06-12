@@ -1,0 +1,11 @@
+package jdbc.dao;
+
+import java.util.Collection;
+
+public interface IDao<T,K> {
+	 Collection<T> readAll(); 
+	 T readOne(K key);
+	 void create(T t);
+	 void update(T t);
+	 void delete(K key);
+}
