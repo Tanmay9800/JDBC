@@ -1,0 +1,26 @@
+package jdbc.main;
+
+
+
+import jdbc.dao.IDao;
+import jdbc.dao.MovieDao;
+import jdbc.entity.Movie;
+
+public class CreateMovieExampleMain {
+
+	public static void main(String[] args) {
+		IDao<Movie, Integer> idaoRef = new MovieDao();
+		Movie movieObject = 
+				new Movie(104, "Predator", "Horror", 1992);
+		idaoRef.create(movieObject);
+
+	}
+
+}
+
+
+
+
+
+
+
